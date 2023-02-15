@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'provided_state.dart';
 
@@ -5,12 +7,12 @@ class StateProvider<T> extends StatefulWidget {
   const StateProvider(
     this.initial, {
     super.key,
-    this.firstLoad,
+    this.future,
     required this.child,
   });
 
   final T Function() initial;
-  final Future<T> Function()? firstLoad;
+  final Future<T> Function()? future;
   final Widget child;
 
   @override
@@ -20,11 +22,18 @@ class StateProvider<T> extends StatefulWidget {
 class _StateProviderState<T> extends State<StateProvider<T>> {
   late T _state;
   bool _isLoading = false;
+  StreamSubscription<T>? _streamSubscription;
+
+  @override
+  void dispose() {
+    _streamSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
     _state = widget.initial();
-    if(widget.firstLoad != null){
+    if(widget.future != null){
       _isLoading = true;
       firstLoad();
     }
@@ -32,7 +41,7 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
   }
 
   Future<void> firstLoad() async{
-    final loadedState = await widget.firstLoad!();
+    final loadedState = await widget.future!();
     collect(loadedState);
   }
 
