@@ -8,11 +8,13 @@ class StateProvider<T> extends StatefulWidget {
     this.initial, {
     super.key,
     this.future,
+    this.stream,
     required this.child,
-  });
+  }) : assert(future == null || stream == null);
 
   final T Function() initial;
   final Future<T> Function()? future;
+  final Stream<T> Function()? stream;
   final Widget child;
 
   @override
@@ -36,6 +38,15 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
     if(widget.future != null){
       _isLoading = true;
       firstLoad();
+    }
+    if(widget.stream != null){
+      _isLoading = true;
+      _streamSubscription = widget.stream!().listen((event) {
+        setState(() {
+          _isLoading = false;
+          _state = event;
+        });
+      });
     }
     super.initState();
   }
