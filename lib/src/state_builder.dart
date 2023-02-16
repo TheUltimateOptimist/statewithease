@@ -8,7 +8,7 @@ class StateBuilder<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return builder(context, context.state<T>());
+    return builder(context, context.watch<T>());
   }
 }
 
@@ -19,6 +19,6 @@ class FutureStateBuilder<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return builder(context, context.state<T>(), context.isLoading<T>());
+    return builder(context, context.watch<T>(), context.isLoading<T>());
   }
 }

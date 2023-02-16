@@ -22,7 +22,7 @@ extension StateExtension on BuildContext {
 
   bool isLoading<T>() => _getProvidedState<T>(_alwaysRebuild).isLoading;
 
-  T state<T>() => _getProvidedState<T>(_alwaysRebuild).state as T;
+  T watch<T>() => _getProvidedState<T>(_alwaysRebuild).state as T;
 
   T read<T>() => _getProvidedState<T>(_neverRebuild).state as T;
 
