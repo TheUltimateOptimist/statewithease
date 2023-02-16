@@ -56,9 +56,9 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
     collect(loadedState);
   }
 
-  void collect(T newState) {
+  void collect(Object? newState) {
     setState(() {
-      _state = newState;
+      _state = newState as T;
       _isLoading = false;
     });
   }
@@ -71,7 +71,7 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return ProvidedState<T>(
+    return ProvidedState<ShouldRebuildCallback<T>>(
       state: _state,
       isLoading: _isLoading,
       collect: collect,
