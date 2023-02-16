@@ -20,9 +20,11 @@ extension StateExtension on BuildContext {
     return providedState;
   }
 
+  bool isLoading<T>() => _getProvidedState<T>(_alwaysRebuild).isLoading;
+
   T state<T>() => _getProvidedState<T>(_alwaysRebuild).state as T;
 
-  bool isLoading<T>() => _getProvidedState<T>(_alwaysRebuild).isLoading;
+  T read<T>() => _getProvidedState<T>(_neverRebuild).state as T;
 
   void collect<T>(T Function(T state) stateMapper) {
     final appState = _getProvidedState<T>(_neverRebuild);
