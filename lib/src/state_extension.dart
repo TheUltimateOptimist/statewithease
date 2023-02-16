@@ -24,6 +24,18 @@ extension StateExtension on BuildContext {
 
   T watch<T>() => _getProvidedState<T>(_alwaysRebuild).state as T;
 
+  R select<T, R>(R Function(T state) selector){
+    final providedState = _getProvidedState<T>((p0, p1){
+      T oldState = p0 as T;
+      T newState = p1 as T;
+      if(selector(oldState) != selector(newState)){
+        return true;
+      }
+      return false;
+    });
+    return selector(providedState.state as T);
+  }
+
   T read<T>() => _getProvidedState<T>(_neverRebuild).state as T;
 
   void collect<T>(T Function(T state) stateMapper) {
