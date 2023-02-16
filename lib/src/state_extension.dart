@@ -7,6 +7,10 @@ extension StateExtension on BuildContext {
     return (Object? _, Object? __) => true;
   }
 
+  bool Function(Object?, Object?) get _neverRebuild{
+    return (Object? _, Object? __) => false;
+  }
+
   ProvidedState _getProvidedState<T>(bool Function(Object?, Object?) aspect) {
     final providedState = InheritedModel.inheritFrom<ProvidedState<ShouldRebuildCallback<T>>>(this, aspect: aspect);
     if (providedState == null) {
@@ -21,13 +25,13 @@ extension StateExtension on BuildContext {
   bool isLoading<T>() => _getProvidedState<T>(_alwaysRebuild).isLoading;
 
   void collect<T>(T Function(T state) stateMapper) {
-    final appState = _getProvidedState<T>(_alwaysRebuild);
+    final appState = _getProvidedState<T>(_neverRebuild);
     final newState = stateMapper(appState.state as T);
     appState.collect(newState);
   }
 
   Future<void> collectFuture<T>(Future<T> Function(T state) stateMapper) async{
-    final providedState = _getProvidedState<T>(_alwaysRebuild);
+    final providedState = _getProvidedState<T>(_neverRebuild);
     providedState.startLoading();
     final newState = await stateMapper(providedState.state as T);
     providedState.collect(newState);
