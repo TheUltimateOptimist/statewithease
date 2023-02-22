@@ -12,9 +12,9 @@ class StateProvider<T> extends StatefulWidget {
     required this.child,
   }) : assert(future == null || stream == null);
 
-  final T Function() initial;
-  final Future<T> Function()? future;
-  final Stream<T> Function()? stream;
+  final T initial;
+  final Future<T>? future;
+  final Stream<T Function(T)>? stream;
   final Widget child;
 
   @override
@@ -24,7 +24,7 @@ class StateProvider<T> extends StatefulWidget {
 class _StateProviderState<T> extends State<StateProvider<T>> {
   late T _state;
   bool _isLoading = false;
-  StreamSubscription<T>? _streamSubscription;
+  StreamSubscription<T Function(T)>? _streamSubscription;
 
   @override
   void dispose() {
@@ -34,17 +34,17 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
 
   @override
   void initState() {
-    _state = widget.initial();
+    _state = widget.initial;
     if(widget.future != null){
       _isLoading = true;
       firstLoad();
     }
     if(widget.stream != null){
       _isLoading = true;
-      _streamSubscription = widget.stream!().listen((event) {
+      _streamSubscription = widget.stream!.listen((stateMapper) {
         setState(() {
           _isLoading = false;
-          _state = event;
+          _state = stateMapper(_state);
         });
       });
     }
@@ -52,7 +52,7 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
   }
 
   Future<void> firstLoad() async{
-    final loadedState = await widget.future!();
+    final loadedState = await widget.future;
     collect(loadedState);
   }
 
