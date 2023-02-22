@@ -45,8 +45,12 @@ class ProvidedState<T> extends InheritedModel<T> {
 
   @override
   bool updateShouldNotifyDependent(covariant InheritedModel oldWidget, Set<T> dependencies) {
+    var oldProvidedState = oldWidget as ProvidedState<T>;
+    if(oldProvidedState.isLoading != isLoading){
+      return true;
+    }
     for(var shouldRebuildCallback in dependencies){
-      if((shouldRebuildCallback as ShouldRebuildCallback<Object?>)((oldWidget as ProvidedState<T>).state, state)){
+      if((shouldRebuildCallback as ShouldRebuildCallback<Object?>)(oldProvidedState.state, state)){
         return true;
       }
     }
