@@ -9,12 +9,14 @@ class StateProvider<T> extends StatefulWidget {
     super.key,
     this.future,
     this.stream,
+    this.mapperStream,
     required this.child,
-  }) : assert(future == null || stream == null);
+  }) : assert((future == null || stream == null) && (future == null || mapperStream == null)) ;
 
   final T initial;
   final Future<T>? future;
-  final Stream<T Function(T)>? stream;
+  final Stream<T>? stream;
+  final Stream<T Function(T)>? mapperStream;
   final Widget child;
 
   @override
@@ -24,11 +26,13 @@ class StateProvider<T> extends StatefulWidget {
 class _StateProviderState<T> extends State<StateProvider<T>> {
   late T _state;
   bool _isLoading = false;
-  StreamSubscription<T Function(T)>? _streamSubscription;
+  StreamSubscription<T Function(T)>? _mapperStreamSubscription;
+  StreamSubscription<T>? _stateStreamSubscription;
 
   @override
   void dispose() {
-    _streamSubscription?.cancel();
+    _mapperStreamSubscription?.cancel();
+    _stateStreamSubscription?.cancel();
     super.dispose();
   }
 
@@ -41,7 +45,16 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
     }
     if(widget.stream != null){
       _isLoading = true;
-      _streamSubscription = widget.stream!.listen((stateMapper) {
+      _stateStreamSubscription = widget.stream!.listen((state) {
+        setState(() {
+          _isLoading = false;
+          _state = state;
+        });
+      });
+    }
+    if(widget.mapperStream != null){
+      _isLoading = true;
+      _mapperStreamSubscription = widget.mapperStream!.listen((stateMapper) {
         setState(() {
           _isLoading = false;
           _state = stateMapper(_state);
