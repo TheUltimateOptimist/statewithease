@@ -7,23 +7,23 @@ class Ignore {
 }
 
 extension PublicStateExtension on BuildContext {
-  bool isLoading<T>() => getProvidedState<T>(rebuildAfterisLoadingChange).isLoading;
+  bool isLoading<T>() => getWrappedState<T>(rebuildAfterisLoadingChange).isLoading;
 
-  T watch<T>() => getProvidedState<T>(rebuildAfterStateChange).state as T;
+  T watch<T>() => getState<T>(rebuildAfterStateChange);
 
   R select<T, R>(R Function(T state) selector) {
-    final providedState = getProvidedState<T>((p0, p1) {
-      T oldState = p0 as T;
-      T newState = p1 as T;
+    final state = getState<T>((p0, p1) {
+      T oldState = p0.state;
+      T newState = p1.state;
       if (selector(oldState) != selector(newState)) {
         return true;
       }
       return false;
     });
-    return selector(providedState.state as T);
+    return selector(state);
   }
 
-  T read<T>() => getProvidedState<T>(neverRebuild).state as T;
+  T read<T>() => getWrappedState<T>(neverRebuild).state;
 
   Future<void> collect<T>(
     dynamic stateMapper, [
@@ -31,19 +31,19 @@ extension PublicStateExtension on BuildContext {
     dynamic secondExtra = const Ignore(),
     dynamic thirdExtra = const Ignore(),
   ]) async {
-    final appState = getProvidedState<T>(neverRebuild);
+    final stateModel = getStateModel<T>(neverRebuild);
     final dynamic newState;
     if (extra is Ignore) {
       assert(stateMapper is T Function(T));
-      newState = stateMapper(appState.state);
+      newState = stateMapper(stateModel.wrappedState.state);
     } else if (secondExtra is Ignore) {
-      newState = stateMapper(appState.state, extra);
+      newState = stateMapper(stateModel.wrappedState.state, extra);
     } else if (thirdExtra is Ignore) {
-      newState = stateMapper(appState.state, extra, secondExtra);
+      newState = stateMapper(stateModel.wrappedState.state, extra, secondExtra);
     } else {
-      newState = stateMapper(appState.state, extra, secondExtra, thirdExtra);
+      newState = stateMapper(stateModel.wrappedState.state, extra, secondExtra, thirdExtra);
     }
     assert(newState is T || newState is Future<T>);
-    appState.collect(await newState);
+    stateModel.collect(await newState);
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'public_state_extension.dart';
 import 'private_state_extension.dart';
+import 'state_model.dart';
 
 class StateBuilder<T> extends StatelessWidget {
   const StateBuilder({super.key, required this.builder, this.buildWhen});
@@ -8,8 +9,8 @@ class StateBuilder<T> extends StatelessWidget {
   final Widget Function(BuildContext, T state) builder;
   final bool Function(T previous, T current)? buildWhen;
 
-  bool _convertedBuildWhen(dynamic previous, dynamic current){
-    return buildWhen!(previous, current);
+  bool _convertedBuildWhen(WrappedState previous, WrappedState current){
+    return buildWhen!(previous.state, current.state);
   }
 
   @override
@@ -19,7 +20,7 @@ class StateBuilder<T> extends StatelessWidget {
       state = context.watch<T>();
     }
     else{
-      state = context.getProvidedState<T>(_convertedBuildWhen).state as T;
+      state = context.getState<T>(_convertedBuildWhen);
     }
     return builder(context, state);
   }
@@ -31,8 +32,8 @@ class FutureStateBuilder<T> extends StatelessWidget {
   final Widget Function(BuildContext, T state, bool isLoading) builder;
   final bool Function(T previous, T current)? buildWhen;
 
-  bool _convertedBuildWhen(dynamic previous, dynamic current){
-    return buildWhen!(previous, current);
+  bool _convertedBuildWhen(WrappedState previous, WrappedState current){
+    return buildWhen!(previous.state, current.state);
   }
 
   @override
@@ -42,7 +43,7 @@ class FutureStateBuilder<T> extends StatelessWidget {
       state = context.watch<T>();
     }
     else{
-      state = context.getProvidedState<T>(_convertedBuildWhen).state as T;
+      state = context.getState<T>(_convertedBuildWhen);
     }
     return builder(context, state, context.isLoading<T>());
   }

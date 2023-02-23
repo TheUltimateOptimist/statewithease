@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'provided_state.dart';
+import 'state_model.dart';
 
 class StateProvider<T> extends StatefulWidget {
   const StateProvider(
@@ -71,9 +71,8 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
 
   @override
   Widget build(BuildContext context) {
-    return ProvidedState<ShouldRebuildCallback<T>>(
-      state: _state,
-      isLoading: _isLoading,
+    return StateModel<ShouldRebuildCallback<T>>(
+      wrappedState: WrappedState<T>(isLoading: _isLoading, state: _state),
       collect: collect,
       startLoading: startLoading,
       child: widget.child,
