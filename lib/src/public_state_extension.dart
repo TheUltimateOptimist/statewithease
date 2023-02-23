@@ -6,12 +6,16 @@ class Ignore {
   const Ignore();
 }
 
-extension PublicStateExtension on BuildContext {
-  bool isLoading<T>() => getWrappedState<T>(rebuildAfterisLoadingChange).isLoading;
+extension ReadExtension on BuildContext{
+  T read<T>() => getWrappedState<T>(neverRebuild).state;
+}
 
+extension WatchExtension on BuildContext{
   T watch<T>() => getState<T>(rebuildAfterStateChange);
+}
 
-  R select<T, R>(R Function(T state) selector) {
+extension SelectExtension on BuildContext{
+   R select<T, R>(R Function(T state) selector) {
     final state = getState<T>((p0, p1) {
       T oldState = p0.state;
       T newState = p1.state;
@@ -22,9 +26,14 @@ extension PublicStateExtension on BuildContext {
     });
     return selector(state);
   }
+}
 
-  T read<T>() => getWrappedState<T>(neverRebuild).state;
+extension IsLoadingExtension on BuildContext{
+  bool isLoading<T>() => getWrappedState<T>(rebuildAfterisLoadingChange).isLoading;
+}
 
+
+extension CollectExtension on BuildContext {
   Future<void> collect<T>(
     dynamic stateMapper, [
     dynamic extra = const Ignore(),
