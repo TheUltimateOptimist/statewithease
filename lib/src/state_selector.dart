@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'public_state_extension.dart';
+import 'public_state_extensions.dart';
 
 class StateSelector<T, R> extends StatelessWidget {
   const StateSelector({super.key, required this.selector, required this.builder});

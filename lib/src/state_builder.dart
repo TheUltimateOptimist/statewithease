@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'public_state_extension.dart';
+import 'public_state_extensions.dart';
 import 'private_state_extension.dart';
 import 'state_model.dart';
 
