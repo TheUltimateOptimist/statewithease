@@ -24,13 +24,13 @@ class StateModel<T> extends InheritedModel<T> {
   StateModel({
     required super.child,
     required this.wrappedState,
-    required this.collect,
-    required this.startLoading,
+    required this.collectState,
+    required this.collectIsLoading,
   });
 
   final WrappedState wrappedState;
-  final void Function(Object? newState) collect;
-  final void Function() startLoading;
+  final void Function(Object? newState) collectState;
+  final void Function(bool isLoading) collectIsLoading;
 
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) {

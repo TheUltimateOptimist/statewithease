@@ -37,7 +37,7 @@ extension PrivateStateExtension on BuildContext{
     final stateModel = getStateModel<T>(neverRebuild);
     try{
       final state = newState(stateModel.wrappedState.state);
-      stateModel.collect(state);
+      stateModel.collectState(state);
     }
     on IgnoreState{
       return;
@@ -54,14 +54,16 @@ extension PrivateStateExtension on BuildContext{
   Future<void> collectInternalAsync<T>(Future<T> Function(T) newState, void Function(BuildContext)? callback) async{
     final stateModel = getStateModel<T>(neverRebuild);
     try{
-      stateModel.startLoading();
+      stateModel.collectIsLoading(true);
       final state = await newState(stateModel.wrappedState.state);
-      stateModel.collect(state);
+      stateModel.collectState(state);
     }
     on IgnoreState{
+      stateModel.collectIsLoading(false);
       return;
     }
     on InvokeCallback{
+      stateModel.collectIsLoading(false);
       assert(callback != null);
       callback!(this);
     }

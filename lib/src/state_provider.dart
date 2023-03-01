@@ -66,19 +66,19 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
 
   Future<void> firstLoad() async{
     final loadedState = await widget.future;
-    collect(loadedState);
+    collectState(loadedState);
   }
 
-  void collect(Object? newState) {
+  void collectState(Object? newState) {
     setState(() {
       _state = newState as T;
       _isLoading = false;
     });
   }
 
-  void startLoading() {
+  void collectIsLoading(bool isLoading) {
     setState(() {
-      _isLoading = true;
+      _isLoading = isLoading;
     });
   }
 
@@ -86,8 +86,8 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
   Widget build(BuildContext context) {
     return StateModel<ShouldRebuildCallback<T>>(
       wrappedState: WrappedState<T>(isLoading: _isLoading, state: _state),
-      collect: collect,
-      startLoading: startLoading,
+      collectState: collectState,
+      collectIsLoading: collectIsLoading,
       child: widget.child,
     );
   }
