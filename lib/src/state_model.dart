@@ -26,11 +26,13 @@ class StateModel<T> extends InheritedModel<T> {
     required this.wrappedState,
     required this.collectState,
     required this.collectIsLoading,
+    required this.registerListener,
   });
 
   final WrappedState wrappedState;
   final void Function(Object? newState) collectState;
   final void Function(bool isLoading) collectIsLoading;
+  final void Function(void Function(WrappedState previous, WrappedState current) listener) registerListener;
 
   @override
   bool updateShouldNotify(covariant InheritedWidget oldWidget) {
