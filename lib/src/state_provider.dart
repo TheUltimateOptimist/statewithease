@@ -24,6 +24,7 @@ class StateProvider<T> extends StatefulWidget {
 }
 
 class _StateProviderState<T> extends State<StateProvider<T>> {
+  late WrappedState<T> _previousState;
   late ValueNotifier<WrappedState<T>> _wrappedStateNotifier;
   StreamSubscription<T Function(T)>? _mapperStreamSubscription;
   StreamSubscription<T>? _stateStreamSubscription;
@@ -68,11 +69,20 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
   }
 
   void collectState(Object? newState) {
+    _previousState = _wrappedStateNotifier.value;
     _wrappedStateNotifier.value = WrappedState(isLoading: false, state: newState as T);
   }
 
   void collectIsLoading(bool isLoading) {
+    _previousState = _wrappedStateNotifier.value;
     _wrappedStateNotifier.value = WrappedState(isLoading: isLoading, state: _wrappedStateNotifier.value.state);
+  }
+
+  void registerListener(void Function(WrappedState<T> previous, WrappedState<T> current) listener){
+
+    _wrappedStateNotifier.addListener(() {
+      listener(_previousState, _wrappedStateNotifier.value);
+    });
   }
 
   @override
@@ -84,6 +94,7 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
           wrappedState: value,
           collectState: collectState,
           collectIsLoading: collectIsLoading,
+          registerListener: registerListener,
           child: widget.child,
         );
       }
