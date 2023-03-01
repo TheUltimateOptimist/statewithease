@@ -24,8 +24,7 @@ class StateProvider<T> extends StatefulWidget {
 }
 
 class _StateProviderState<T> extends State<StateProvider<T>> {
-  late T _state;
-  bool _isLoading = false;
+  late ValueNotifier<WrappedState<T>> _wrappedStateNotifier;
   StreamSubscription<T Function(T)>? _mapperStreamSubscription;
   StreamSubscription<T>? _stateStreamSubscription;
 
@@ -33,32 +32,31 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
   void dispose() {
     _mapperStreamSubscription?.cancel();
     _stateStreamSubscription?.cancel();
+    _wrappedStateNotifier.dispose();
     super.dispose();
   }
 
   @override
   void initState() {
-    _state = widget.initial;
+    var isLoading = false;
+    if(widget.future != null || widget.stream != null || widget.mapperStream != null){
+      isLoading = true;
+    }
+    _wrappedStateNotifier = ValueNotifier(WrappedState(isLoading: isLoading, state: widget.initial));
+   
     if(widget.future != null){
-      _isLoading = true;
       firstLoad();
     }
+    
     if(widget.stream != null){
-      _isLoading = true;
       _stateStreamSubscription = widget.stream!.listen((state) {
-        setState(() {
-          _isLoading = false;
-          _state = state;
-        });
+        collectState(state);
       });
     }
+
     if(widget.mapperStream != null){
-      _isLoading = true;
       _mapperStreamSubscription = widget.mapperStream!.listen((stateMapper) {
-        setState(() {
-          _isLoading = false;
-          _state = stateMapper(_state);
-        });
+        collectState(stateMapper(_wrappedStateNotifier.value.state));
       });
     }
     super.initState();
@@ -70,25 +68,25 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
   }
 
   void collectState(Object? newState) {
-    setState(() {
-      _state = newState as T;
-      _isLoading = false;
-    });
+    _wrappedStateNotifier.value = WrappedState(isLoading: false, state: newState as T);
   }
 
   void collectIsLoading(bool isLoading) {
-    setState(() {
-      _isLoading = isLoading;
-    });
+    _wrappedStateNotifier.value = WrappedState(isLoading: isLoading, state: _wrappedStateNotifier.value.state);
   }
 
   @override
   Widget build(BuildContext context) {
-    return StateModel<ShouldRebuildCallback<T>>(
-      wrappedState: WrappedState<T>(isLoading: _isLoading, state: _state),
-      collectState: collectState,
-      collectIsLoading: collectIsLoading,
-      child: widget.child,
+    return ValueListenableBuilder(
+      valueListenable: _wrappedStateNotifier,
+      builder: (context, value, _) {
+        return StateModel<ShouldRebuildCallback<T>>(
+          wrappedState: value,
+          collectState: collectState,
+          collectIsLoading: collectIsLoading,
+          child: widget.child,
+        );
+      }
     );
   }
 }
