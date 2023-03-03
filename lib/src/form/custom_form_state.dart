@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'submit_message.dart';
 
 class CustomFormState<T extends Enum>{
-  CustomFormState(this.fields) : submitErrorMessage = null, formKey = GlobalKey<FormState>(), _controllers = Map.fromEntries(fields.map((id) => MapEntry(id, TextEditingController())));
+  CustomFormState(this.fields) : message = null, formKey = GlobalKey<FormState>(), _controllers = Map.fromEntries(fields.map((id) => MapEntry(id, TextEditingController())));
 
   final List<T> fields;
   final Map<T, TextEditingController> _controllers;
-  final String? submitErrorMessage;
+  final Message? message;
   final GlobalKey<FormState> formKey;
 
-  CustomFormState.internal(this.fields, this._controllers, this.submitErrorMessage, this.formKey);
+  CustomFormState.internal(this.fields, this._controllers, this.message, this.formKey);
 
   Map<T, String> get values => _controllers.map((key, value) => MapEntry(key, value.text));
 
@@ -20,7 +21,7 @@ class CustomFormState<T extends Enum>{
 
   void reset() => formKey.currentState!.reset();
 
-  CustomFormState<T> withSubmitErrorMessage(String? newSubmitErrorMessage){
-    return CustomFormState.internal(fields, _controllers, newSubmitErrorMessage, formKey);
+  CustomFormState<T> withMessage(Message? newMessage){
+    return CustomFormState.internal(fields, _controllers, newMessage, formKey);
   }
 }
