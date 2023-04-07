@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'private_state_extension.dart';
 
-class Ignore {
-  const Ignore();
-}
-
 extension ReadExtension on BuildContext{
   T read<T>() => getWrappedState<T>(neverRebuild).state;
 }
