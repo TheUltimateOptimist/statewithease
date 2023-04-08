@@ -8,3 +8,4 @@ export 'src/state_selector.dart';
 export 'src/form/form.dart';
 export 'src/state_mapper_exceptions.dart';
 export 'src/state_listener.dart';
+export 'src/state_stream.dart';
