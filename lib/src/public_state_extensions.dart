@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'private_state_extension.dart';
+import 'state_stream.dart';
 
 extension ReadExtension on BuildContext{
   T read<T>() => getWrappedState<T>(neverRebuild).state;
@@ -60,5 +61,23 @@ extension CollectFutureOneExtension on BuildContext{
 extension CollectFutureTwoExtension on BuildContext{
   Future<void> collectFutureTwo<T, P1, P2>(Future<T> Function(T, P1, P2) stateMapper, P1 param1, P2 param2, {void Function(BuildContext)? callback}) async{
     await collectInternalAsync<T>((state) async => await stateMapper(state, param1, param2), callback);
+  }
+}
+
+extension CollectStateStreamExtension on BuildContext{
+  void collectStateStream<T>(StateStream<T> Function(T) getStateStream, {void Function(BuildContext)? callback}) async{
+    collectInternalStateStream<T>((state) => getStateStream(state), callback);
+  }
+}
+
+extension CollectStateStreamOneExtension on BuildContext{
+  void collectStateStreamOne<T, P1>(StateStream<T> Function(T, P1) getStateStream, P1 param1, {void Function(BuildContext)? callback}) async{
+    collectInternalStateStream<T>((state) => getStateStream(state, param1), callback);
+  }
+}
+
+extension CollectStateStreamTwoExtension on BuildContext{
+  void collectStateStreamTwo<T, P1, P2>(StateStream<T> Function(T, P1, P2) getStateStream, P1 param1, P2 param2, {void Function(BuildContext)? callback}) async{
+    collectInternalStateStream<T>((state) => getStateStream(state, param1, param2), callback);
   }
 }

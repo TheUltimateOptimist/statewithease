@@ -3,6 +3,7 @@ import 'state_mapper_exceptions.dart';
 
 
 import 'state_model.dart';
+import 'state_stream.dart';
 
 extension PrivateStateExtension on BuildContext{
   bool Function(WrappedState, WrappedState) get alwaysRebuild {
@@ -64,6 +65,24 @@ extension PrivateStateExtension on BuildContext{
     }
     on InvokeCallback{
       stateModel.collectIsLoading(false);
+      assert(callback != null);
+      callback!(this);
+    }
+    catch(e){
+      rethrow;
+    }
+  }
+
+  void collectInternalStateStream<T>(StateStream<T> Function(T) getStateStream, void Function(BuildContext)? callback) {
+    final stateModel = getStateModel<T>(neverRebuild);
+    try{
+      final stateStream = getStateStream(stateModel.wrappedState.state);
+      stateModel.collectStateStream(stateStream);
+    }
+    on IgnoreState{
+      return;
+    }
+    on InvokeCallback{
       assert(callback != null);
       callback!(this);
     }
