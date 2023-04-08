@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'state_stream.dart';
 import 'state_model.dart';
 
 class StateProvider<T> extends StatefulWidget {
@@ -8,15 +9,13 @@ class StateProvider<T> extends StatefulWidget {
     this.initial, {
     super.key,
     this.future,
-    this.stream,
-    this.mapperStream,
+    this.stateStreams,
     required this.child,
-  }) : assert((future == null || stream == null) && (future == null || mapperStream == null)) ;
+  });
 
   final T initial;
   final Future<T>? future;
-  final Stream<T>? stream;
-  final Stream<T Function(T)>? mapperStream;
+  final List<StateStream<T>>? stateStreams;
   final Widget child;
 
   @override
@@ -26,13 +25,13 @@ class StateProvider<T> extends StatefulWidget {
 class _StateProviderState<T> extends State<StateProvider<T>> {
   late WrappedState<T> _previousState;
   late ValueNotifier<WrappedState<T>> _wrappedStateNotifier;
-  StreamSubscription<T Function(T)>? _mapperStreamSubscription;
-  StreamSubscription<T>? _stateStreamSubscription;
+  final List<StreamSubscription> _anonymousStreamSubscriptions = List.empty(growable: true);
 
   @override
   void dispose() {
-    _mapperStreamSubscription?.cancel();
-    _stateStreamSubscription?.cancel();
+    for (var subscription in _anonymousStreamSubscriptions) {
+      subscription.cancel();
+    }
     _wrappedStateNotifier.dispose();
     super.dispose();
   }
@@ -40,30 +39,22 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
   @override
   void initState() {
     var isLoading = false;
-    if(widget.future != null || widget.stream != null || widget.mapperStream != null){
+    if (widget.future != null) {
       isLoading = true;
     }
     _wrappedStateNotifier = ValueNotifier(WrappedState(isLoading: isLoading, state: widget.initial));
-   
-    if(widget.future != null){
+    if (widget.future != null) {
       firstLoad();
     }
-    
-    if(widget.stream != null){
-      _stateStreamSubscription = widget.stream!.listen((state) {
-        collectState(state);
-      });
-    }
-
-    if(widget.mapperStream != null){
-      _mapperStreamSubscription = widget.mapperStream!.listen((stateMapper) {
-        collectState(stateMapper(_wrappedStateNotifier.value.state));
-      });
+    if(widget.stateStreams != null){
+      for(final stateStream in widget.stateStreams!){
+        collectStateStream(stateStream);
+      }
     }
     super.initState();
   }
 
-  Future<void> firstLoad() async{
+  Future<void> firstLoad() async {
     final loadedState = await widget.future;
     collectState(loadedState);
   }
@@ -73,13 +64,24 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
     _wrappedStateNotifier.value = WrappedState(isLoading: false, state: newState as T);
   }
 
+  void collectStateStream(StateStream stateStream) {
+    final streamSubcription = stateStream.stream.listen((stateMapper) {
+      collectState(stateMapper(_wrappedStateNotifier.value.state));
+    });
+    if(stateStream.assign != null){
+      stateStream.assign!(_wrappedStateNotifier.value.state, streamSubcription);
+    }
+    else{
+      _anonymousStreamSubscriptions.add(streamSubcription);
+    }
+  }
+
   void collectIsLoading(bool isLoading) {
     _previousState = _wrappedStateNotifier.value;
     _wrappedStateNotifier.value = WrappedState(isLoading: isLoading, state: _wrappedStateNotifier.value.state);
   }
 
-  void registerListener(void Function(WrappedState<T> previous, WrappedState<T> current) listener){
-
+  void registerListener(void Function(WrappedState<T> previous, WrappedState<T> current) listener) {
     _wrappedStateNotifier.addListener(() {
       listener(_previousState, _wrappedStateNotifier.value);
     });
@@ -88,16 +90,16 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: _wrappedStateNotifier,
-      builder: (context, value, _) {
-        return StateModel<ShouldRebuildCallback<T>>(
-          wrappedState: value,
-          collectState: collectState,
-          collectIsLoading: collectIsLoading,
-          registerListener: registerListener,
-          child: widget.child,
-        );
-      }
-    );
+        valueListenable: _wrappedStateNotifier,
+        builder: (context, value, _) {
+          return StateModel<ShouldRebuildCallback<T>>(
+            wrappedState: value,
+            collectState: collectState,
+            collectStateStream: collectStateStream,
+            collectIsLoading: collectIsLoading,
+            registerListener: registerListener,
+            child: widget.child,
+          );
+        });
   }
 }
