@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'state_stream.dart';
-
 typedef ShouldRebuildCallback<T> = bool Function(
     WrappedState<T> oldWrappedState, WrappedState<T> newWrappedState);
 
@@ -34,7 +32,7 @@ class StateModel<T> extends InheritedModel<T> {
 
   final WrappedState wrappedState;
   final void Function(Object? newState) collectState;
-  final void Function(StateStream stateStream) collectStateStream;
+  final void Function(dynamic stateStream) collectStateStream;
   final void Function(bool isLoading) collectIsLoading;
   final void Function(void Function(WrappedState previous, WrappedState current) listener) registerListener;
 

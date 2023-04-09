@@ -64,7 +64,7 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
     _wrappedStateNotifier.value = WrappedState(isLoading: false, state: newState as T);
   }
 
-  void collectStateStream(StateStream stateStream) {
+  void collectStateStream(dynamic stateStream) {
     final streamSubcription = stateStream.stream.listen((stateMapper) {
       collectState(stateMapper(_wrappedStateNotifier.value.state));
     });
