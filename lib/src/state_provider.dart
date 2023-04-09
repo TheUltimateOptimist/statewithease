@@ -10,12 +10,14 @@ class StateProvider<T> extends StatefulWidget {
     super.key,
     this.future,
     this.stateStreams,
+    this.postFirstBuild,
     required this.child,
   });
 
   final T initial;
   final Future<T>? future;
   final List<StateStream<T>>? stateStreams;
+  final void Function(BuildContext context, T state)? postFirstBuild;
   final Widget child;
 
   @override
@@ -98,7 +100,14 @@ class _StateProviderState<T> extends State<StateProvider<T>> {
             collectStateStream: collectStateStream,
             collectIsLoading: collectIsLoading,
             registerListener: registerListener,
-            child: widget.child,
+            child: Builder(builder: (context) {
+              if(widget.postFirstBuild != null){
+                WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+                  widget.postFirstBuild!(context, _wrappedStateNotifier.value.state);
+                });
+              }
+              return widget.child;
+            },),
           );
         });
   }
