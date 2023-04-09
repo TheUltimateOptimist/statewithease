@@ -65,19 +65,37 @@ extension CollectFutureTwoExtension on BuildContext{
 }
 
 extension CollectStateStreamExtension on BuildContext{
-  void collectStateStream<T>(StateStream<T> Function(T) getStateStream, {void Function(BuildContext)? callback}) async{
+  void collectStateStream<T>(StateStream<T> Function(T) getStateStream, {void Function(BuildContext)? callback}) {
     collectInternalStateStream<T>((state) => getStateStream(state), callback);
   }
 }
 
 extension CollectStateStreamOneExtension on BuildContext{
-  void collectStateStreamOne<T, P1>(StateStream<T> Function(T, P1) getStateStream, P1 param1, {void Function(BuildContext)? callback}) async{
+  void collectStateStreamOne<T, P1>(StateStream<T> Function(T, P1) getStateStream, P1 param1, {void Function(BuildContext)? callback}) {
     collectInternalStateStream<T>((state) => getStateStream(state, param1), callback);
   }
 }
 
 extension CollectStateStreamTwoExtension on BuildContext{
-  void collectStateStreamTwo<T, P1, P2>(StateStream<T> Function(T, P1, P2) getStateStream, P1 param1, P2 param2, {void Function(BuildContext)? callback}) async{
+  void collectStateStreamTwo<T, P1, P2>(StateStream<T> Function(T, P1, P2) getStateStream, P1 param1, P2 param2, {void Function(BuildContext)? callback}) {
     collectInternalStateStream<T>((state) => getStateStream(state, param1, param2), callback);
+  }
+}
+
+extension CollectFutureStateStreamExtension on BuildContext{
+  void collectStateStream<T>(Future<StateStream<T>> Function(T) getStateStream, {void Function(BuildContext)? callback}) async{
+    collectInternalStateStreamAsync<T>((state) => getStateStream(state), callback);
+  }
+}
+
+extension CollectFutureStateStreamOneExtension on BuildContext{
+  void collectStateStream<T, P1>(Future<StateStream<T>> Function(T, P1) getStateStream, P1 param1, {void Function(BuildContext)? callback}) async{
+    collectInternalStateStreamAsync<T>((state) => getStateStream(state, param1), callback);
+  }
+}
+
+extension CollectFutureStateStreamTwoExtension on BuildContext{
+  void collectStateStream<T, P1, P2>(Future<StateStream<T>> Function(T, P1, P2) getStateStream, P1 param1, P2 param2, {void Function(BuildContext)? callback}) async{
+    collectInternalStateStreamAsync<T>((state) => getStateStream(state, param1, param2), callback);
   }
 }

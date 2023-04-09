@@ -91,6 +91,24 @@ extension PrivateStateExtension on BuildContext{
     }
   }
 
+    void collectInternalStateStreamAsync<T>(Future<StateStream<T>> Function(T) getStateStream, void Function(BuildContext)? callback) async {
+    final stateModel = getStateModel<T>(neverRebuild);
+    try{
+      final stateStream = await getStateStream(stateModel.wrappedState.state);
+      stateModel.collectStateStream(stateStream);
+    }
+    on IgnoreState{
+      return;
+    }
+    on InvokeCallback{
+      assert(callback != null);
+      callback!(this);
+    }
+    catch(e){
+      rethrow;
+    }
+  }
+
   WrappedState<T> getWrappedState<T>(bool Function(WrappedState, WrappedState) aspect){
     return getStateModel<T>(aspect).wrappedState as WrappedState<T>;
   }
